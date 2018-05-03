@@ -1,0 +1,374 @@
+@{
+    var serviceToken = ViewBag.ServiceToken;
+    var baseUri = ViewBag.BaseUri;
+    var requireId = ViewBag.ReqireId;
+    ViewData["Title"] = "Service";
+    ViewData["Path"] = new[] { "Service" };
+}
+<link href="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/6.6.5/sweetalert2.css" rel="stylesheet" />
+<div class="card-body">
+    <div class="panel panel-default">
+        <div class="panel-heading top-bar">
+            <div class="col-md-8 col-xs-8">
+                <h3 class="panel-title"><span class="glyphicon glyphicon-comment"></span>客服DashBoard</h3>
+            </div>
+                <div class="col-md-4 col-xs-4" style="text-align: right;">
+
+                </div>
+        </div>
+        <div id="contentLog"></div>
+        <div class="panel-footer">
+            <div class="input-group">
+                <input id="btn-input" type="text" class="form-control input-sm chat_input" placeholder="Write your message here..." />
+                <span class="input-group-btn">
+                    <button class="btn btn-primary btn-sm" id="btn-chat" disabled="true">Send</button>
+                    <button class="btn btn-danger btn-sm" id="btn-close" disabled="true">close</button>
+                    <button class="btn btn-green btn-sm" id="btn-appraise" disabled="true">Appraise</button>
+                    <button class="btn btn-green btn-sm" id="btn-transhandle" disabled="true">TransHandle</button>
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/6.6.5/sweetalert2.js"></script>
+    <script>
+    $(document).ready(function(){
+        Connection();
+    });
+
+    $('#btn-chat').on('click',function(e){
+        Send();
+        $('#btn-input').val("");
+    });
+
+    $('#btn-close').on('click',function(e){
+        Close();
+    });
+
+    $('#btn-transhandle').on('click',function(e){
+        GetQusetionType();
+    });
+
+    $('#btn-input').on('keyup', function(event){
+        if (event.keyCode == 13){
+            Send();
+            $('#btn-input').val("");
+        }
+    });
+
+    $('#btn-appraise').on('click',function(e){
+        GetSolution();
+    });
+
+    var _token;
+    var _groupName;
+    let connection;
+    function Connection()
+        {
+            var _baseUri = "@(baseUri)";
+            connection = new signalR.HubConnection(_baseUri);
+            connection.on('reply', (result) => {
+                var model = JSON.parse(result);
+                switch(model.ReplyMethodName)
+                {
+                    case 1:
+                    _token = model.Content;
+                    $('#contentLog').append('<p>---Connected---</p>')
+                    $('#contentLog').append('<p>Token = '+_token+'</p>')
+                    break;
+                    case 2:
+                    if(model.ReplyStatus == 1){
+                        _groupName = model.Content;
+                        $('#contentLog').append('<p>Success!! Group name = '+model.Content+'</p>');
+                        Enable();
+                    }
+                    else{
+                        $('#contentLog').append('<p>Error!!</p>');
+                    }
+                    break;
+                    default:
+                    break;
+                }
+            });
+            connection.on('send', (content) => {
+                var model = JSON.parse(content);
+                if (model.From == '@(serviceToken)')
+                {
+                    var Receive = JSON.parse(model.Message);
+                    switch (Receive.Command)
+                    {
+                        case 0:
+                        Echo();
+                        break;
+                        case 16:
+                        $('#contentLog').append('<p>Please Wait A Second!!!</p>');
+                        break;
+                        case 8:
+                        $('#btn-input').val();
+                        $('#contentLog').append('<p>From : <span style="color:Green">'+Receive.FromId+'</span>, Message: <span style="color:red">'+Receive.Message+'</span></p>')
+                        break;
+                        case 4:
+                        Group(Receive.Message);
+                        break;
+                        case 1:
+                        AcceptSupportRequirement();
+                        break;
+                        case 63:
+                        var Option = Receive.Message.split(',');
+                        AppraiseTransHandle(Option);
+                        break;
+                        case 128:
+                        var History = JSON.parse(Receive.Message);
+                        switch (History.Status)
+                        {
+                            case 8:
+                            var option = JSON.parse(History.Message);
+                            $('#contentLog').append('<p>Solution : <span style="color:Green">'+option.Title+'</span>, Select: <span style="color:red">'+option.Description+'</span></p>');
+                            break;
+                            case 2:
+                            $('#contentLog').append('<p>Reply From: <span style="color:Green">Customer</span>, Message: <span style="color:red">'+History.Message+'</span></p>');
+                            break;
+                            case 4:
+                            $('#contentLog').append('<p>Reply From : <span style="color:Green">Support Service '+History.Name+'</span>, Message: <span style="color:red">'+History.Message+'</span></p>');
+                            break;
+                        }
+                        break;
+                        case 256:
+                        var Option = JSON.parse(Receive.Message);
+                        AppraiseSolution(Option);
+                        break;
+                        case 1024:
+                        var option = JSON.parse(Receive.Message);
+                        $('#contentLog').append('<p>Solution : <span style="color:Green">'+option.Title+'</span>, Select: <span style="color:red">'+option.Description+'</span></p>');
+                        break;
+                        case 2048:
+                        var host = window.location.host;
+                        var query;
+                        console.log(Receive.Message);
+                        switch (Receive.Message)
+                        {
+                            case 'Normal':
+                            query = '/Customer/CustomerList';
+                            break;
+                            case 'Technical':
+                            query = '/Customer/ItList';
+                            break;
+                            default:
+                            break;
+                        }
+                        window.location = 'http://' + host + query;
+                        break;
+                    }
+                }
+            });
+            connection.start().then(() => setTimeout(function() {RegisterToService() }, 1000));
+        }
+
+        function Echo()
+        {
+            var commandjs = {'CustomerCmd':'Echo','Content':''};
+            var js = {'Deliver':'','Target':'@(serviceToken)','Message':JSON.stringify(commandjs),'From':_token};
+
+            connection.invoke('send',JSON.stringify(js));
+        }
+
+        function RegisterToService()
+        {
+            var messagejs = {'Id':_token,'ClientType':'Employee'}
+            var commandjs = {'CustomerCmd':'Register','Content':JSON.stringify(messagejs)};
+            var js = {'Deliver':'','Target':'@(serviceToken)','Message':JSON.stringify(commandjs),'From':_token};
+
+            connection.invoke('send',JSON.stringify(js));
+        }
+
+        function AcceptSupportRequirement()
+        {
+            var messagejs = {'Id':'@(requireId)','Handler':_token}
+            var commandjs = {'CustomerCmd':'Requirement','Content':JSON.stringify(messagejs)};
+            var js = {'Deliver':'','Target':'@(serviceToken)','Message':JSON.stringify(commandjs),'From':_token};
+
+            connection.invoke('send',JSON.stringify(js));
+        }
+
+        function Send()
+        {
+            var messagejs = {'SupportRequirementId':'@(requireId)','Message':$('#btn-input').val(),'Status':'HandlerReply'};
+            var commandjs = {'CustomerCmd':'Reply','Content':JSON.stringify(messagejs),'Group':_groupName};
+            var js = {'Deliver':'','Target':'@(serviceToken)','Message':JSON.stringify(commandjs),'From':_token};
+
+            connection.invoke('send',JSON.stringify(js));
+        }
+
+        function GetSolution()
+        {
+            var commandjs = {'CustomerCmd':'GetSolution','Content':_token};
+            var js = {'Deliver':'','Target':'@(serviceToken)','Message':JSON.stringify(commandjs),'From':_token};
+
+            connection.invoke('send',JSON.stringify(js));
+        }
+
+        function CheckSolution(data)
+        {
+            var str = '@(requireId);'+data;
+            var commandjs = {'CustomerCmd':'CheckSolution','Content':str};
+            var js = {'Deliver':'','Target':'@(serviceToken)','Message':JSON.stringify(commandjs),'From':_token};
+
+            connection.invoke('send',JSON.stringify(js));
+        }
+
+        function Close()
+        {
+            var commandjs = {'CustomerCmd':'Close','Content':'@(requireId)'};
+            var js = {'Deliver':'','Target':'@(serviceToken)','Message':JSON.stringify(commandjs),'From':_token};
+
+            connection.invoke('send',JSON.stringify(js));
+        }
+
+        function GetQusetionType()
+        {
+            var commandjs = {'CustomerCmd':'GetQusetionType','Content':_token};
+            var js = {'Deliver':'','Target':'@(serviceToken)','Message':JSON.stringify(commandjs),'From':_token};
+
+            connection.invoke('send',JSON.stringify(js));
+        }
+
+        function TransHandle(data)
+        {
+            var messagejs = {'RequirementId':'@(requireId)','QType':data};
+            var commandjs = {'CustomerCmd':'TransHandle','Content':JSON.stringify(messagejs)};
+            var js = {'Deliver':'','Target':'@(serviceToken)','Message':JSON.stringify(commandjs),'From':_token};
+
+            connection.invoke('send',JSON.stringify(js));
+        }
+
+        function Group(groupName)
+        {
+            connection.invoke('subscribe',groupName);
+        }
+
+        function Enable()
+        {
+            $('#btn-chat').attr('disabled', false);
+            $('#btn-close').attr('disabled', false);
+            $('#btn-appraise').attr('disabled', false);
+            $('#btn-transhandle').attr('disabled', false);
+        }
+
+        function Disable()
+        {
+            $('#btn-chat').attr('disabled', true);
+            $('#btn-close').attr('disabled', true);
+            $('#btn-appraise').attr('disabled', true);
+            $('#btn-transhandle').attr('disabled', true);
+        }
+
+        function AppraiseSolution(data)
+        {
+            var optionJson = {};
+            $.each(data, function(key, value){
+                var html = '<div class="col-md-12" style="text-align:left"><h3>'+value.Title+'</h3><ul>';
+                $.each(value.SupportSolutionOptions, function(key, option){
+                    html += '<li>'+option.Description+'</li>';
+                });
+                html += '</ul></div>'
+                optionJson[value.Id] = html;
+            });
+
+            var inputOptions = new Promise(function (resolve) {
+                setTimeout(function () {
+                    resolve(optionJson)
+                }, 0)
+            })
+            swal({
+                title: "挑選解決方案",
+                text: "請挑選解決方案提供給客戶做選擇",
+                type: 'question',
+                input: 'radio',
+                inputOptions: inputOptions,
+                inputValidator: function (result){
+                    return new Promise(function(resolve,reject){
+                        if (result) {
+                            resolve()
+                        } else{
+                            reject('請挑選一組解決方案')
+                        }
+                    })
+                },
+                showCancelButton: true,
+                cancelButtonText: 'Not Now',
+                cancelButtonColor: '#f05050',
+                animation: true,
+           }).then(function (result) {
+                CheckSolution(result);
+                swal(
+                    '挑選完畢',
+                    '將會傳送給客戶',
+                    'success'
+                )
+            }, function (dismiss) {
+                if (dismiss === 'cancel') {
+                    var data = 'NotNow';
+                    swal(
+                        '取消',
+                        '已取消挑選解決方案 :(',
+                        'error'
+                    )
+                }
+            })
+        }
+
+        function AppraiseTransHandle(data)
+        {
+            var optionJson = {};
+            $.each(data, function(key, option){
+                var html = '<div class="col-md-12" style="text-align:left">';
+                html += '<h3>'+option+'</h3></div>';
+                optionJson[option] = html;
+            });
+
+            var inputOptions = new Promise(function (resolve) {
+                setTimeout(function () {
+                    resolve(optionJson)
+                }, 0)
+            })
+            swal({
+                title: "您將轉交給?!",
+                text: "請選取要轉交的部門",
+                type: 'question',
+                input: 'radio',
+                inputOptions: inputOptions,
+                inputValidator: function (result){
+                    return new Promise(function(resolve,reject){
+                        if (result) {
+                            resolve()
+                        } else{
+                            reject('請選取一個部門')
+                        }
+                    })
+                },
+                showCancelButton: true,
+                cancelButtonText: 'Not Now',
+                cancelButtonColor: '#f05050',
+                animation: true,
+           }).then(function (result) {
+                TransHandle(result);
+                swal(
+                    '選取完畢',
+                    '將此需求單轉交給您所選取的部門',
+                    'success'
+                )
+            }, function (dismiss) {
+                if (dismiss === 'cancel') {
+                    var data = 'NotNow';
+                    swal(
+                        '取消',
+                        '已取消轉交部門 :(',
+                        'error'
+                    )
+                }
+            })
+        }
+    </script>
+}

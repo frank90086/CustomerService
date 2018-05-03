@@ -1,0 +1,81 @@
+@{
+    ViewData["Title"] = "Client Page";
+}
+
+<div>
+    <h1>Connection Setting：</h1>
+    <select id="connectionTypeSelect" >
+        <option value="Hub">Hub</option>
+        <option value="Service">Service</option>
+        <option value="Client">Client</option>
+    </select>
+    <button id="connectionBtn" onclick="Connection()">Connection</button>
+</div>
+<div>
+    <h1>Add Group Setting：</h1>
+    <input id="groupInput" type="text"/>
+    <button id="addGroupBtn" onclick="Group()">Add</button>
+</div>
+<div>
+    <h1>Send Setting：</h1>
+    <p>Target：</p>
+    <input id="targetInput" type="text"/>
+    <p>Message：</p>
+    <input id="messageInput" type="text"/>
+    <button id="sendMessageBtn" onclick="Send()">Send</button>
+</div>
+<div id="contentLog"></div>
+
+@section Scripts{
+    <script>
+        var _token;
+        let connection;
+        function Connection()
+        {
+            var connectionType = $('#connectionTypeSelect option:selected').text();
+            var baseUrl = 'http://tliix-hotch.azurewebsites.net/notificationhub?connectionType='+connectionType;
+            connection = new signalR.HubConnection(baseUrl);
+            connection.on('reply', (result) => {
+                var model = JSON.parse(result);
+                switch(model.ReplyMethodName)
+                {
+                    case 1:
+                    _token = model.Content;
+                    $('#contentLog').append('<p>---Connected---</p>')
+                    $('#contentLog').append('<p>Token = '+_token+'</p>')
+                    break;
+                    case 2:
+                    if(model.ReplyStatus == "1"){
+                        _groupname = model.Content;
+                        $('#contentLog').append('<p>Success!! Group name = '+model.Content+'</p>');
+                    }
+                    else{
+                        $('#contentLog').append('<p>Error!!</p>');
+                    }
+                    break;
+                    default:
+                    break;
+                }
+            });
+            connection.on('send', (content) => {
+                var model = JSON.parse(content);
+                $('#contentLog').append('From : <span style="color:Green">'+model.From+'</span>, Message: <span style="color:red">'+model.Message+'</span></p>')
+            });
+            connection.start();
+        }
+
+        function Send()
+        {
+            var message = $('#messageInput').val();
+            var js = {'Deliver':'','Target':$('#targetInput').val(),'Message':message,'From':_token};
+            
+            connection.invoke('send',JSON.stringify(js), false);
+        }
+
+        function Group()
+        {
+            var groupName = $('#groupInput').val();
+            connection.invoke('subscribe',groupName);
+        }
+    </script>
+}

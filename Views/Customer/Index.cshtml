@@ -1,0 +1,325 @@
+@{
+    var serviceToken = ViewBag.ServiceToken;
+    var baseUri = ViewBag.BaseUri;
+    ViewData["Title"] = "Customer";
+    ViewData["Path"] = new[] { "Customer" };
+}
+@section Styles {
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/6.6.5/sweetalert2.css" rel="stylesheet" />
+    <style>
+        table {
+            border: 0
+        }
+
+        .commslog-data {
+            font-family: Consolas, Courier New, Courier, monospace;
+        }
+
+        .commslog-server {
+            background-color: red;
+            color: white
+        }
+
+        .commslog-client {
+            background-color: green;
+            color: white
+        }
+    </style>
+}
+    <div class="card-body">
+        <div class="container">
+            <div class="col-xs-12 col-md-12">
+                    <div class="panel panel-default">
+                        <div class="panel-heading top-bar">
+                            <div class="col-md-8 col-xs-8">
+                                <h3 class="panel-title"><span class="glyphicon glyphicon-comment"></span> 聯繫客服</h3>
+                            </div>
+                            <div class="col-md-4 col-xs-4" style="text-align: right;">
+                                <a href="#"><span id="minim_chat_window" class="glyphicon glyphicon-minus icon_minim"></span></a>
+                                <!--<a href="#"><span class="glyphicon glyphicon-remove icon_close" data-id="chat_window_1"></span></a>-->
+                            </div>
+                        </div>
+                        <div class="panel-body msg_container_base" id="commsList">
+                            <div class="connection-set-name" id="setInfo">
+                                <div class="row msg_container base_sent">
+                                    <div class="col-md-12 col-xs-12">
+                                        <div class="messages msg_sent">
+                                            <label for="setName">Set your Name:</label>
+                                            <input id="setName" class="form-control"/>
+                                            <label for="setEmail">Set your Email:</label>
+                                            <input id="setEmail" class="form-control"/>
+                                            <label for="setQuestion">Set your Question:</label>
+                                            <select id="setQuestion" class="form-control">
+                                                <option value="Normal">Normal</option>
+                                                <option value="Technical">Technical</option>
+                                            </select>
+                                            <button id="connectButton" type="submit" class="form-control" style="margin-top:20px">繼續</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="panel-footer">
+                            <div class="input-group">
+                                <input id="btn-input" type="text" class="form-control input-sm chat_input" placeholder="Write your message here..." />
+                                <span class="input-group-btn">
+                        <button class="btn btn-primary btn-sm" id="btn-chat" disabled="true">Send</button>
+                        </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+        </div>
+    </div>
+    <div id="contentLog"></div>
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/6.6.5/sweetalert2.js"></script>
+    <script>
+    $('#connectButton').on('click',function(e){
+        $('#setInfo').fadeOut('fast');
+        Connection();
+    });
+
+    $('#btn-chat').on('click',function(e){
+        Send();
+        $('#btn-input').val("");
+    });
+
+    $('#btn-input').on('keyup', function(event){
+        if (event.keyCode == 13){
+            Send();
+            $('#btn-input').val("");
+        }
+    });
+
+    var _token;
+    var _requireId;
+    var _groupName;
+    let connection;
+
+    $(document).ready(function(){
+        _requireId = getCookie("requireId");
+        if (_requireId != "")
+        {
+            $('#setInfo').fadeOut('slow');
+            setTimeout
+            Connection();
+        }
+    });
+
+    function Connection()
+        {
+            var _baseUri = "@(baseUri)";
+            connection = new signalR.HubConnection(_baseUri);
+            connection.on('reply', (result) => {
+                var model = JSON.parse(result);
+                switch(model.ReplyMethodName)
+                {
+                    case 1:
+                    _token = model.Content;
+                    $('#contentLog').append('<p>---Connected---</p>')
+                    $('#contentLog').append('<p>Token = '+_token+'</p>')
+                    break;
+                    case 2:
+                    if(model.ReplyStatus == 1){
+                        _groupName = model.Content;
+                        $('#contentLog').append('<p>Success!! Group name = '+model.Content+'</p>');
+                        Enable();
+                    }
+                    else{
+                        $('#contentLog').append('<p>Error!!</p>');
+                    }
+                    break;
+                    default:
+                    break;
+                }
+            });
+            connection.on('send', (content) => {
+                var model = JSON.parse(content);
+                if (model.From == '@(serviceToken)')
+                {
+                    var Receive = JSON.parse(model.Message);
+                    switch (Receive.Command)
+                    {
+                        case 0:
+                        Echo();
+                        break;
+                        case 2:
+                        _requireId = Receive.Message;
+                        document.cookie = "requireId=" + Receive.Message + ";path=/";
+                        $('#contentLog').append('<p>Please Wait A Second!!!</p>');
+                        break;
+                        case 8:
+                        $('#btn-input').val();
+                        $('#contentLog').append('<p>From : <span style="color:Green">'+Receive.FromId+'</span>, Message: <span style="color:red">'+Receive.Message+'</span></p>');
+                        break;
+                        case 4:
+                        Group(Receive.Message);
+                        break;
+                        case 1:
+                        CreateSupportRequirement();
+                        break;
+                        case 128:
+                        var History = JSON.parse(Receive.Message);
+                        switch (History.Status)
+                        {
+                            case 8:
+                            var option = JSON.parse(History.Message);
+                            $('#contentLog').append('<p>Solution : <span style="color:Green">'+option.Title+'</span>, Select: <span style="color:red">'+option.Description+'</span></p>');
+                            break;
+                            case 2:
+                            $('#contentLog').append('<p>Reply From: <span style="color:Green">You</span>, Message: <span style="color:red">'+History.Message+'</span></p>');
+                            break;
+                            case 4:
+                            $('#contentLog').append('<p>Reply From : <span style="color:Green">Support Service '+History.Name+'</span>, Message: <span style="color:red">'+History.Message+'</span></p>');
+                            break;
+                        }
+                        break;
+                        case 256:
+                        Appraise(Receive.Message);
+                        break;
+                        case 1024:
+                        var option = JSON.parse(Receive.Message);
+                        $('#contentLog').append('<p>Solution : <span style="color:Green">'+option.Title+'</span>, Select: <span style="color:red">'+option.Description+'</span></p>');
+                        break;
+                        case 2048:
+                        document.cookie = "requireId=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+                        location.reload();
+                        break;
+                    }
+                }
+            });
+            connection.start().then(() => setTimeout(function() {RegisterToService() }, 1000));
+        }
+
+        function Echo()
+        {
+            var commandjs = {'CustomerCmd':'Echo','Content':''};
+            var js = {'Deliver':'','Target':'@(serviceToken)','Message':JSON.stringify(commandjs),'From':_token};
+
+            connection.invoke('send',JSON.stringify(js));
+        }
+
+        function RegisterToService()
+        {
+            var messagejs = {'Id':_token,'ClientType':'Client'}
+            var commandjs = {'CustomerCmd':'Register','Content':JSON.stringify(messagejs)};
+            var js = {'Deliver':'','Target':'@(serviceToken)','Message':JSON.stringify(commandjs),'From':_token};
+
+            connection.invoke('send',JSON.stringify(js));
+        }
+
+        function CreateSupportRequirement()
+        {
+            var messagejs = {'Id':_requireId,'MemberId':_token,'Name':$('#setName').val(),'Email':$('#setEmail').val(),'QType':$('#setQuestion').val()}
+            var commandjs = {'CustomerCmd':'Requirement','Content':JSON.stringify(messagejs)};
+            var js = {'Deliver':'','Target':'@(serviceToken)','Message':JSON.stringify(commandjs),'From':_token};
+
+            connection.invoke('send',JSON.stringify(js));
+        }
+
+        function Send()
+        {
+            var messagejs = {'SupportRequirementId':_requireId,'Message':$('#btn-input').val(),'Status':'CustomerReply'};
+            var commandjs = {'CustomerCmd':'Reply','Content':JSON.stringify(messagejs),'Group':_groupName};
+            var js = {'Deliver':'','Target':'@(serviceToken)','Message':JSON.stringify(commandjs),'From':_token};
+
+            connection.invoke('send',JSON.stringify(js));
+        }
+
+        function SelectSolution(data)
+        {
+            var str = _requireId+';'+data;
+            var commandjs = {'CustomerCmd':'SelectSolution','Content':str};
+            var js = {'Deliver':'','Target':'@(serviceToken)','Message':JSON.stringify(commandjs),'From':_token};
+
+            connection.invoke('send',JSON.stringify(js));
+        }
+
+        function Group(groupName)
+        {
+            connection.invoke('subscribe',groupName);
+        }
+
+        function Enable()
+        {
+            $('#btn-chat').attr('disabled', false);
+        }
+
+        function Disable()
+        {
+            $('#btn-chat').attr('disabled', true);
+        }
+
+        function Appraise(data)
+        {
+            var solution = JSON.parse(data);
+
+            var optionJson = {};
+                $.each(solution.SupportSolutionOptions, function(key, option){
+                    var html = '<div class="col-md-12" style="text-align:left">';
+                    html += '<h3>'+option.Description+'</h3></div>';
+                    optionJson[option.Id] = html;
+                });
+
+            var inputOptions = new Promise(function (resolve) {
+                setTimeout(function () {
+                    resolve(optionJson)
+                }, 0)
+            })
+            swal({
+                title: solution.Title,
+                text: "請挑選想要的選項",
+                type: 'question',
+                input: 'radio',
+                allowOutsideClick: false,
+                inputOptions: inputOptions,
+                inputValidator: function (result){
+                    return new Promise(function(resolve,reject){
+                        if (result) {
+                            resolve()
+                        } else{
+                            reject('請挑選一個選項')
+                        }
+                    })
+                },
+                showCancelButton: true,
+                cancelButtonText: 'Not Now',
+                cancelButtonColor: '#f05050',
+                animation: true,
+           }).then(function (result) {
+                SelectSolution(result);
+                swal(
+                    '挑選完畢',
+                    '謝謝您，我們將盡快為您處裡',
+                    'success'
+                )
+            }, function (dismiss) {
+                if (dismiss === 'cancel') {
+                    var data = 'NotNow';
+                    swal(
+                        '取消',
+                        '已取消挑選解決方案 :(',
+                        'error'
+                    )
+                }
+            })
+        }
+
+        function getCookie(cname) {
+            var name = cname + "=";
+            var decodedCookie = decodeURIComponent(document.cookie);
+            var ca = decodedCookie.split(';');
+            for(var i = 0; i <ca.length; i++) {
+                var c = ca[i];
+                while (c.charAt(0) == ' ') {
+                    c = c.substring(1);
+                }
+                if (c.indexOf(name) == 0) {
+                    return c.substring(name.length, c.length);
+                }
+            }
+            return "";
+        }
+    </script>
+}

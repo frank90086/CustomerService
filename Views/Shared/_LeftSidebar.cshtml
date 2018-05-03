@@ -1,0 +1,330 @@
+<aside class="left-sidebar">
+<!-- Sidebar scroll-->
+<div class="scroll-sidebar">
+<!-- User profile -->
+<div class="user-profile" style="background: url(/images/background/user-info.jpg) no-repeat;">
+    <!-- User profile image -->
+    <div class="profile-img">
+        <img src="~/images/users/profile.png" alt="user"/>
+    </div>
+    <!-- User profile text-->
+    <div class="profile-text">
+        <a href="#" class="dropdown-toggle u-dropdown" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="true">Yvonne Wu</a>
+        <div class="dropdown-menu animated flipInY">
+            <a href="#" class="dropdown-item"><i class="material-icons">&#xE853;</i> My Profile</a>
+            <a href="#" class="dropdown-item"><i class="material-icons">&#xE850;</i> My Balance</a>
+            <a href="#" class="dropdown-item"><i class="material-icons">&#xE156;</i> Inbox</a>
+            <div class="dropdown-divider"></div>
+            <a href="#" class="dropdown-item"><i class="material-icons">&#xE8B8;</i> Account Setting</a>
+            <div class="dropdown-divider"></div>
+            <a asp-controller="Home" asp-action="SignOut" class="dropdown-item"><i class="material-icons">&#xE8AC;</i> Logout</a>
+        </div>
+    </div>
+</div>
+<!-- End User profile text-->
+<!-- Sidebar navigation-->
+<nav class="sidebar-nav">
+<ul id="sidebarnav">
+<li class="nav-small-cap">PERSONAL</li>
+<li>
+    <a asp-controller="Home" asp-action="Index">
+        <i class="material-icons">&#xE871;</i><span class="hide-menu">Dashboard</span>
+    </a>
+</li>
+<li>
+    <a class="has-arrow waves-effect waves-dark" href="#" aria-expanded="false">
+        <i class="material-icons">&#xE851;</i><span class="hide-menu">帳號資訊</span>
+    </a>
+    <ul aria-expanded="false" class="collapse">
+        <li>
+            <a href="#Avatar">顯示頭像</a>
+        </li>
+        <li>
+            <a href="#">重設密碼</a>
+        </li>
+        <li>
+            <a href="#">帳單地址</a>
+        </li>
+        <li>
+            <a href="#">銀行帳戶</a>
+        </li>
+        <li>
+            <a href="#">實名認證</a>
+        </li>
+    </ul>
+</li>
+<li>
+    <a href="#">
+        <i class="material-icons">&#xE7F2;</i><span class="hide-menu">推廣</span>
+    </a>
+</li>
+<li class="nav-devider"></li>
+<li class="nav-small-cap">TEACHER</li>
+<li>
+    <a class="has-arrow waves-effect waves-dark" href="#" aria-expanded="false">
+        <i class="material-icons">&#xE85D;</i><span class="hide-menu">我的課表</span>
+    </a>
+    <ul aria-expanded="false" class="collapse">
+        <li>
+            <a asp-controller="Teacher" asp-action="DefaultWorktime">預設開放排課時間</a>
+        </li>
+        <li>
+            <a href="#">排課時間調整</a>
+        </li>
+        <li>
+            <a href="#">預備課程</a>
+        </li>
+        <li>
+            <a href="#">授課紀錄</a>
+        </li>
+    </ul>
+</li>
+<li>
+    <a href="#">
+        <i class="material-icons">&#xE263;</i><span class="hide-menu">課時費</span>
+    </a>
+</li>
+<li>
+    <a class="has-arrow waves-effect waves-dark" href="#" aria-expanded="false">
+        <i class="material-icons">&#xE553;</i><span class="hide-menu">證書管理</span>
+    </a>
+    <ul aria-expanded="false" class="collapse">
+        <li>
+            <a href="#">新增證書</a>
+        </li>
+        <li>
+            <a href="#">證書清單</a>
+        </li>
+    </ul>
+</li>
+<!--
+<li> <a class="has-arrow waves-effect waves-dark" href="#" aria-expanded="false"><i class="material-icons">&#xE30A;</i><span class="hide-menu">Template Demos</span></a>
+    <ul aria-expanded="false" class="collapse">
+        <li><a href="#">Minisidebar</a></li>
+        <li><a href="#">Horizontal</a></li>
+        <li><a href="#">Dark Version</a></li>
+        <li><a href="#">RTL Version</a></li>
+        <li><a href="javascript:angular">Anuglar-CLI Starter kit</a></li>
+    </ul>
+</li>
+<li>
+    <a class="has-arrow waves-effect waves-dark" href="#" aria-expanded="false"><i class="material-icons">&#xE5C3;</i><span class="hide-menu">Apps</span></a>
+    <ul aria-expanded="false" class="collapse">
+        <li><a href="#">Calendar</a></li>
+        <li><a href="#">Chat app</a></li>
+        <li><a href="#">Support Ticket</a></li>
+        <li><a href="#">Contact / Employee</a></li>
+        <li><a href="#">Contact Grid</a></li>
+        <li><a href="#">Contact Detail</a></li>
+    </ul>
+</li>
+<li>
+    <a class="has-arrow waves-effect waves-dark" href="#" aria-expanded="false"><i class="material-icons">&#xE0BE;</i><span class="hide-menu">Inbox</span></a>
+    <ul aria-expanded="false" class="collapse">
+        <li><a href="#">Mailbox</a></li>
+        <li><a href="#">Mailbox Detail</a></li>
+        <li><a href="#">Compose Mail</a></li>
+    </ul>
+</li>
+<li>
+    <a class="has-arrow waves-effect waves-dark" href="#" aria-expanded="false"><i class="material-icons">&#xE6DD;</i><span class="hide-menu">Ui Elements</span></a>
+    <ul aria-expanded="false" class="collapse">
+        <li><a href="#">Cards</a></li>
+        <li><a href="#">User Cards</a></li>
+        <li><a href="#">Buttons</a></li>
+        <li><a href="#">Modals</a></li>
+        <li><a href="#">Tab</a></li>
+        <li><a href="#">Tooltip &amp; Popover</a></li>
+        <li><a href="#">Tooltip stylish</a></li>
+        <li><a href="#">Sweet Alert</a></li>
+        <li><a href="#">Notification</a></li>
+        <li><a href="#">Progressbar</a></li>
+        <li><a href="#">Nestable</a></li>
+        <li><a href="#">Range slider</a></li>
+        <li><a href="#">Timeline</a></li>
+        <li><a href="#">Typography</a></li>
+        <li><a href="#">Horizontal Timeline</a></li>
+        <li><a href="#">Session Timeout</a></li>
+        <li><a href="#">Session Ideal Timeout</a></li>
+        <li><a href="#">Bootstrap Ui</a></li>
+        <li><a href="#">Breadcrumb</a></li>
+        <li><a href="#">Bootstrap Switch</a></li>
+        <li><a href="#">List Media</a></li>
+        <li><a href="#">Ribbons</a></li>
+        <li><a href="#">Grid</a></li>
+        <li><a href="#">Carousel</a></li>
+        <li><a href="#">Date-paginator</a></li>
+        <li><a href="#">Dragable Portlet</a></li>
+    </ul>
+</li>
+<li class="nav-devider"></li>
+<li class="nav-small-cap">FORMS, TABLE &amp; WIDGETS</li>
+<li>
+    <a class="has-arrow waves-effect waves-dark" href="#" aria-expanded="false"><i class="material-icons">&#xE24D;</i><span class="hide-menu">Forms</span></a>
+    <ul aria-expanded="false" class="collapse">
+        <li><a href="#">Basic Forms</a></li>
+        <li><a href="#">Form Layouts</a></li>
+        <li><a href="#">Form Addons</a></li>
+        <li><a href="#">Form Material</a></li>
+        <li><a href="#">Floating Lable</a></li>
+        <li><a href="#">Form Pickers</a></li>
+        <li><a href="#">File Upload</a></li>
+        <li><a href="#">Form Mask</a></li>
+        <li><a href="#">Form Validation</a></li>
+        <li><a href="#">File Dropzone</a></li>
+        <li><a href="#">Icheck control</a></li>
+        <li><a href="#">Image Cropper</a></li>
+        <li><a href="#">HTML5 Editor</a></li>
+        <li><a href="#">Form Typehead</a></li>
+        <li><a href="#">Form Wizard</a></li>
+        <li><a href="#">Xeditable Editor</a></li>
+        <li><a href="#">Summernote Editor</a></li>
+        <li><a href="#">Tinymce Editor</a></li>
+    </ul>
+</li>
+<li>
+    <a class="has-arrow waves-effect waves-dark" href="#" aria-expanded="false"><i class="material-icons">&#xE3EC;</i><span class="hide-menu">Tables</span></a>
+    <ul aria-expanded="false" class="collapse">
+        <li><a href="#">Basic Tables</a></li>
+        <li><a href="#">Table Layouts</a></li>
+        <li><a href="#">Data Tables</a></li>
+        <li><a href="#">Footable</a></li>
+        <li><a href="#">Js Grid Table</a></li>
+        <li><a href="#">Responsive Table</a></li>
+        <li><a href="#">Bootstrap Tables</a></li>
+        <li><a href="#">Editable Table</a></li>
+    </ul>
+</li>
+<li>
+    <a class="has-arrow waves-effect waves-dark" href="#" aria-expanded="false"><i class="material-icons">&#xE1BD;</i><span class="hide-menu">Widgets</span></a>
+    <ul aria-expanded="false" class="collapse">
+        <li><a href="#">Widget Apps</a></li>
+        <li><a href="#">Widget Data</a></li>
+        <li><a href="#">Widget Charts</a></li>
+    </ul>
+</li>
+<li class="nav-devider"></li>
+<li class="nav-small-cap">EXTRA COMPONENTS</li>
+<li>
+    <a class="has-arrow waves-effect waves-dark" href="#" aria-expanded="false"><i class="material-icons">&#xE431;</i><span class="hide-menu">Page Layout</span></a>
+    <ul aria-expanded="false" class="collapse">
+        <li><a href="#">1 Column</a></li>
+        <li><a href="#">Fix header</a></li>
+        <li><a href="#">Fix sidebar</a></li>
+        <li><a href="#">Fixe header &amp; Sidebar</a></li>
+        <li><a href="#">Boxed Layout</a></li>
+        <li><a href="#">Logo in Center</a></li>
+    </ul>
+</li>
+<li>
+    <a class="has-arrow waves-effect waves-dark" href="#" aria-expanded="false"><i class="material-icons">&#xE2C8;</i><span class="hide-menu">Sample Pages</span></a>
+    <ul aria-expanded="false" class="collapse">
+        <li><a href="#">Starter Kit</a></li>
+        <li><a href="#">Blank page</a></li>
+        <li><a href="#" class="has-arrow">Authentication <span class="label label-rounded label-success">6</span></a>
+            <ul aria-expanded="false" class="collapse">
+                <li><a href="#">Login 1</a></li>
+                <li><a href="#">Login 2</a></li>
+                <li><a href="#">Register</a></li>
+                <li><a href="#">Register 2</a></li>
+                <li><a href="#">Lockscreen</a></li>
+                <li><a href="#">Recover password</a></li>
+            </ul>
+        </li>
+        <li><a href="#">Profile page</a></li>
+        <li><a href="#">Animation</a></li>
+        <li><a href="#">Sticky Left sidebar</a></li>
+        <li><a href="#">Sticky Right sidebar</a></li>
+        <li><a href="#">Invoice</a></li>
+        <li><a href="#">Treeview</a></li>
+        <li><a href="#">Helper Classes</a></li>
+        <li><a href="#">Search result</a></li>
+        <li><a href="#">Scrollbar</a></li>
+        <li><a href="#">Pricing</a></li>
+        <li><a href="#">Lighbox popup</a></li>
+        <li><a href="#">Gallery</a></li>
+        <li><a href="#">Faqs</a></li>
+        <li><a href="#" class="has-arrow">Error Pages</a>
+            <ul aria-expanded="false" class="collapse">
+                <li><a href="#">400</a></li>
+                <li><a href="#">403</a></li>
+                <li><a href="#">404</a></li>
+                <li><a href="#">500</a></li>
+                <li><a href="#">503</a></li>
+            </ul>
+        </li>
+    </ul>
+</li>
+<li>
+    <a class="has-arrow waves-effect waves-dark" href="#" aria-expanded="false"><i class="material-icons">&#xE24B;</i><span class="hide-menu">Charts</span></a>
+    <ul aria-expanded="false" class="collapse">
+        <li><a href="#">Morris Chart</a></li>
+        <li><a href="#">Chartis Chart</a></li>
+        <li><a href="#">Echarts</a></li>
+        <li><a href="#">Flot Chart</a></li>
+        <li><a href="#">Knob Chart</a></li>
+        <li><a href="#">Chartjs</a></li>
+        <li><a href="#">Sparkline Chart</a></li>
+        <li><a href="#">Extra chart</a></li>
+        <li><a href="#">Peity Charts</a></li>
+    </ul>
+</li>
+<li>
+    <a class="has-arrow waves-effect waves-dark" href="#" aria-expanded="false"><i class="material-icons">&#xE24E;</i><span class="hide-menu">Icons</span></a>
+    <ul aria-expanded="false" class="collapse">
+        <li><a href="#">Material Icons</a></li>
+        <li><a href="#">Fontawesome Icons</a></li>
+        <li><a href="#">Themify Icons</a></li>
+        <li><a href="#">Linea Icons</a></li>
+        <li><a href="#">Weather Icons</a></li>
+        <li><a href="#">Simple Lineicons</a></li>
+        <li><a href="#">Flag Icons</a></li>
+    </ul>
+</li>
+<li>
+    <a class="has-arrow waves-effect waves-dark" href="#" aria-expanded="false"><i class="material-icons">&#xE55F;</i><span class="hide-menu">Maps</span></a>
+    <ul aria-expanded="false" class="collapse">
+        <li><a href="#">Google Maps</a></li>
+        <li><a href="#">Vector Maps</a></li>
+    </ul>
+</li>
+<li>
+    <a class="has-arrow waves-effect waves-dark" href="#" aria-expanded="false"><i class="material-icons">&#xE53B;</i><span class="hide-menu">Multi level dd</span></a>
+    <ul aria-expanded="false" class="collapse">
+        <li><a href="#">item 1.1</a></li>
+        <li><a href="#">item 1.2</a></li>
+        <li>
+            <a class="has-arrow" href="#" aria-expanded="false">Menu 1.3</a>
+            <ul aria-expanded="false" class="collapse">
+                <li><a href="#">item 1.3.1</a></li>
+                <li><a href="#">item 1.3.2</a></li>
+                <li><a href="#">item 1.3.3</a></li>
+                <li><a href="#">item 1.3.4</a></li>
+            </ul>
+        </li>
+        <li><a href="#">item 1.4</a></li>
+    </ul>
+</li>
+-->
+</ul>
+</nav>
+<!-- End Sidebar navigation -->
+</div>
+<!-- End Sidebar scroll-->
+<!-- Bottom points-->
+<div class="sidebar-footer">
+    <!-- item-->
+    <a href="" class="link" data-toggle="tooltip" title="Settings">
+        <i class="material-icons">&#xE8B8;</i>
+    </a>
+    <!-- item-->
+    <a href="" class="link" data-toggle="tooltip" title="Email">
+        <i class="material-icons">&#xE0BE;</i>
+    </a>
+    <!-- item-->
+    <a asp-controller="Home" asp-action="SignOut" class="link" data-toggle="tooltip" title="Logout">
+        <i class="material-icons">&#xE8AC;</i>
+    </a>
+</div>
+<!-- End Bottom points-->
+</aside>

@@ -1,0 +1,297 @@
+@{
+    ViewData["Title"] = "預設開放排課時間";
+    ViewData["Path"] = new[] { "我的課表", "預設開放排課時間" };
+}
+<div class="card-body">
+<h4 class="card-title">預設開放排課時間</h4>
+<h6 class="card-subtitle">在這邊您可以設置預設開放每週平台自動排課時間</h6>
+<form class="form-material m-t-40">
+<div class="form-group">
+    <label for="cbOpen" class="d-block">開啟或關閉預設開放排課時間</label>
+    <input id="cbOpen" type="checkbox" checked class="js-switch" data-color="#009efb"/>
+    <small id="spanOpen" class="text-danger" style="display: none">注意！關閉預設時間系統將不再自動排課給您</small>
+</div>
+<div class="form-group">
+    <label>僅接受多久前的排課(小時)</label>
+    <input type="number" class="form-control" value="48">
+</div>
+<div class="text-center">
+<table class="table table-bordered color-table inverse-table">
+<thead>
+<tr>
+    <th></th>
+    <th class="text-center">日</th>
+    <th class="text-center">一</th>
+    <th class="text-center">二</th>
+    <th class="text-center">三</th>
+    <th class="text-center">四</th>
+    <th class="text-center">五</th>
+    <th class="text-center">六</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+    <td>00:00</td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+</tr>
+<tr>
+    <td>01:00</td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+</tr>
+<tr>
+    <td>02:00</td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+</tr>
+<tr>
+    <td>03:00</td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+</tr>
+<tr>
+    <td>04:00</td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+</tr>
+<tr>
+    <td>05:00</td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+</tr>
+<tr>
+    <td>06:00</td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+</tr>
+<tr>
+    <td>07:00</td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+</tr>
+<tr>
+    <td>08:00</td>
+    <td></td>
+    <td class="table-success"></td>
+    <td class="table-success"></td>
+    <td class="table-success"></td>
+    <td class="table-success"></td>
+    <td class="table-success"></td>
+    <td></td>
+</tr>
+<tr>
+    <td>09:00</td>
+    <td></td>
+    <td class="table-success"></td>
+    <td class="table-success"></td>
+    <td class="table-success"></td>
+    <td class="table-success"></td>
+    <td class="table-success"></td>
+    <td></td>
+</tr>
+<tr>
+    <td>10:00</td>
+    <td></td>
+    <td class="table-success"></td>
+    <td class="table-success"></td>
+    <td class="table-success"></td>
+    <td class="table-success"></td>
+    <td class="table-success"></td>
+    <td></td>
+</tr>
+<tr>
+    <td>11:00</td>
+    <td></td>
+    <td class="table-success"></td>
+    <td class="table-success"></td>
+    <td class="table-success"></td>
+    <td class="table-success"></td>
+    <td class="table-success"></td>
+    <td></td>
+</tr>
+<tr>
+    <td>12:00</td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+</tr>
+<tr>
+    <td>13:00</td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+</tr>
+<tr>
+    <td>14:00</td>
+    <td></td>
+    <td class="table-success"></td>
+    <td class="table-success"></td>
+    <td class="table-success"></td>
+    <td class="table-success"></td>
+    <td class="table-success"></td>
+    <td></td>
+</tr>
+<tr>
+    <td>15:00</td>
+    <td></td>
+    <td class="table-success"></td>
+    <td class="table-success"></td>
+    <td class="table-success"></td>
+    <td class="table-success"></td>
+    <td class="table-success"></td>
+    <td></td>
+</tr>
+<tr>
+    <td>16:00</td>
+    <td></td>
+    <td class="table-success"></td>
+    <td class="table-success"></td>
+    <td class="table-success"></td>
+    <td class="table-success"></td>
+    <td class="table-success"></td>
+    <td></td>
+</tr>
+<tr>
+    <td>17:00</td>
+    <td></td>
+    <td class="table-success"></td>
+    <td class="table-success"></td>
+    <td class="table-success"></td>
+    <td class="table-success"></td>
+    <td class="table-success"></td>
+    <td></td>
+</tr>
+<tr>
+    <td>18:00</td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+</tr>
+<tr>
+    <td>19:00</td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+</tr>
+<tr>
+    <td>20:00</td>
+    <td></td>
+    <td class="table-success"></td>
+    <td class="table-success"></td>
+    <td class="table-success"></td>
+    <td class="table-success"></td>
+    <td class="table-success"></td>
+    <td></td>
+</tr>
+<tr>
+    <td>21:00</td>
+    <td></td>
+    <td class="table-success"></td>
+    <td class="table-success"></td>
+    <td class="table-success"></td>
+    <td class="table-success"></td>
+    <td class="table-success"></td>
+    <td></td>
+</tr>
+<tr>
+    <td>22:00</td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+</tr>
+<tr>
+    <td>23:00</td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+</tr>
+</tbody>
+</table>
+</div>
+</form>
+</div>
+
+@section Styles {
+}
+
+@section Scripts {
+    <environment names="Development">
+        <script>
+            $(document).ready(function() {
+                var elems = Array.prototype.slice.call(document.querySelectorAll('.js-switch'));
+                $('.js-switch').each(function() { new Switchery($(this)[0], $(this).data()); });
+
+                $('#cbOpen').on('change',
+                    function() {
+                        $('#spanOpen').hide();
+                        if (!$(this).is(':checked')) $('#spanOpen').show();
+                    });
+            });
+        </script>
+    </environment>
+}

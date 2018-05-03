@@ -1,0 +1,32 @@
+﻿.material-icons {
+    font-size: inherit;
+    position: relative;
+}
+
+.topbar .top-navbar .navbar-nav > .nav-item > .nav-link > i.material-icons {
+    font-size: 24px;
+    top: 6px;
+}
+
+.sidebar-footer > a i.material-icons { top: 2px; }
+
+.dropdown-menu > .dropdown-item > i.material-icons {
+    font-size: 24px;
+    top: 6px;
+}
+
+.dropdown-menu > .dropdown-user > li > a > i.material-icons {
+    font-size: 24px;
+    top: 6px;
+}
+
+.btn-weixin {
+    background-color: #7bb321;
+    color: #ffffff;
+}
+
+.btn-48 {
+    max-width: 48px;
+    min-width: 48px;
+    width: 48px;
+}

@@ -1,0 +1,118 @@
+@model Omi.Education.Web.Management.Models.CustomerModels.CustomerViewModel
+@{
+    var serviceToken = ViewBag.ServiceToken;
+    var baseUri = ViewBag.BaseUri;
+    ViewData["Title"] = "ItList";
+    ViewData["Path"] = new[] { "ItList" };
+}
+
+@section Styles{
+    <link href="~/css/style.css" rel="stylesheet" />
+    <link href="~/lib/chartist/dist/chartist.min.css" rel="stylesheet" />
+}
+
+<form method="GET" id="frmMain"></form>
+
+@*<div class="row" id="updateAppraise">
+    <label style="display:none" id="verypoorCount" asp-for="VeryPoor"></label>
+    <label style="display:none" id="poorCount" asp-for="Poor"></label>
+    <label style="display:none" id="okCount" asp-for="Ok"></label>
+    <label style="display:none" id="goodCount" asp-for="Good"></label>
+    <label style="display:none" id="verygoodCount" asp-for="VeryGood"></label>
+    @Html.Partial("_calculationAppraise")
+</div>*@
+
+<div class="card-body">
+    <div class="col-md-9" id="updateitList">
+        @Html.Partial("_itList")
+    </div>
+    <div class="col-md-3" id="updateChart">
+        <label style="display:none" id="waitCount" asp-for="Wait"></label>
+        <label style="display:none" id="handlingCount" asp-for="Handling"></label>
+        <label style="display:none" id="completeCount" asp-for="Complete"></label>
+        <label style="display:none" id="runawayCount" asp-for="Runaway"></label>
+        @Html.Partial("_calculationChart")
+    </div>
+</div>
+
+@section scripts {
+    <script src="~/lib/flot/jquery.flot.js"></script>
+    <script src="~/lib/flot.tooltip/js/jquery.flot.tooltip.min.js"></script>
+    <script src="~/lib/flot/jquery.flot.pie.js"></script>
+    <script src="~/js/ServiceChart.js" asp-append-version="true"></script>
+    <script src="~/lib/chart.js/dist/Chart.js"></script>
+    <script src="~/lib/moment/moment.js"></script>
+    <script src="~/lib/moment-duration-format/lib/moment-duration-format.js"></script>
+    <script src="~/lib/jquery-color/jquery.color.js"></script>
+    <script src="~/lib/chartist/dist/chartist.js"></script>
+    <script>
+    $(document).ready(function(){
+        Connection();
+    });
+
+    var _token;
+    let connection;
+    function Connection()
+        {
+            var _baseUri = "@(baseUri)";
+            connection = new signalR.HubConnection(_baseUri);
+            connection.on('reply', (result) => {
+                var model = JSON.parse(result);
+                switch(model.ReplyMethodName)
+                {
+                    case 1:
+                    _token = model.Content;
+                    $('#contentLog').append('<p>---Connected---</p>')
+                    $('#contentLog').append('<p>Token = '+_token+'</p>')
+                    break;
+                    case 2:
+                    if(model.ReplyStatus == 1){
+                        _groupname = model.Content;
+                        $('#contentLog').append('<p>Success!! Group name = '+model.Content+'</p>');
+                    }
+                    else{
+                        $('#contentLog').append('<p>Error!!</p>');
+                    }
+                    break;
+                    default:
+                    break;
+                }
+            });
+            connection.on('send', (content) => {
+                var model = JSON.parse(content);
+                if (model.From == '@(serviceToken)')
+                {
+                    var Receive = JSON.parse(model.Message);
+
+                    switch (Receive.Command)
+                    {
+                        case 32:
+                        autoReload();
+                        break;
+                    }
+                }
+            });
+            connection.start().then(() => setTimeout(function() {RegisterToService() }, 1000));
+        }
+
+        function RegisterToService()
+        {
+            var messagejs = {'Id':_token,'ClientType':'List'}
+            var commandjs = {'CustomerCmd':'Register','Content':JSON.stringify(messagejs)};
+            var js = {'Deliver':'','Target':'@(serviceToken)','Message':JSON.stringify(commandjs),'From':_token};
+
+            connection.invoke('send',JSON.stringify(js));
+        }
+
+        function Send()
+        {
+
+        }
+
+        function Group()
+        {
+            var groupName = $('#groupInput').val();
+            connection.invoke('subscribe',groupName);
+        }
+    </script>
+}
