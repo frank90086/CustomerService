@@ -16,14 +16,14 @@
 </div>
 
 @section Styles {
-    <environment names="Development">
+    <environment names="Staging,Production">
         <link rel="stylesheet" href="~/lib/fullcalendar/dist/fullcalendar.css"/>
         <link href="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/6.6.5/sweetalert2.css" rel="stylesheet" />
     </environment>
 }
 
 @section Scripts {
-    <environment names="Development">
+    <environment names="Staging,Production">
         <script type="text/javascript" src="~/lib/fullcalendar/dist/fullcalendar.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/6.6.5/sweetalert2.js"></script>
         <script>
