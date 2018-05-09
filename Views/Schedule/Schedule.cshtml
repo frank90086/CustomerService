@@ -1,0 +1,78 @@
+@{
+    ViewData["Title"] = "Schedule";
+    ViewData["Path"] = new[] { "Schedule" };
+    var schedule = @Html.Raw(ViewBag.Schedule);
+}
+
+<div class="card-body">
+    <p><span id="cubeColor"></span>：Chinese Class</p>
+    <div id="calendar"></div>
+</div>
+<div class="card-body">
+    <form asp-controller="Schedule" asp-action="Selection" method="post" id="sendselectionsform">
+        <input id="selectionscontent" style="display:none" name="Selections"/>
+        <button type="button" onclick="sendselections()">Send Selections</button>
+    </form>
+</div>
+
+@section Styles {
+    <environment names="Development">
+        <link rel="stylesheet" href="~/lib/fullcalendar/dist/fullcalendar.css"/>
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/6.6.5/sweetalert2.css" rel="stylesheet" />
+    </environment>
+}
+
+@section Scripts {
+    <environment names="Development">
+        <script type="text/javascript" src="~/lib/fullcalendar/dist/fullcalendar.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/6.6.5/sweetalert2.js"></script>
+        <script>
+            $(document).ready(function() {
+                var schedule = @(schedule);
+                var scheduleTable = [];
+                $('#cubeColor').append('■').css({'color': schedule.Color, 'font-size': '28px'});
+                $(schedule.Events).each(function(index, value){
+                    var item = {
+                            title: schedule.Name + ' ' +moment(value.StartDate).format('HH:mm'),
+                            start: moment(value.StartDate).format('YYYY-MM-DDTHH:mm:ssZ'),
+                            end:moment(value.EndDate).format('YYYY-MM-DDTHH:mm:ssZ'),
+                            backgroundColor: schedule.Color,
+                            borderColor: schedule.Color
+                        };
+                        scheduleTable.push(item);
+                });
+                $('#calendar').fullCalendar({
+                        height: 736,
+                        header: {
+                            left: 'prev,next today',
+                            center: 'title',
+                            right: 'month,agendaWeek'
+                        },
+                        slotDuration: "01:00:00",
+                        slotLabelFormat: 'HH:mm',
+                        navLinks: true, // can click day/week names to navigate views
+                        slotEventOverlap: false,
+                        allDaySlot: false,
+                        selectable: true,
+                        select: function (start, end) {
+                            var view = $('#calendar').fullCalendar('getView');
+                            if (view.name == 'month') {
+                               $('#calendar').fullCalendar('changeView', 'agendaWeek');
+                               $("#calendar").fullCalendar('gotoDate', start);
+                            }
+                        },
+                        editable: false,
+                        eventLimit: true,
+                        eventOverlap: true,
+                        eventDurationEditable: false,
+                        displayEventTime: false,
+                        displayEventEnd: false,
+                        timeFormat: 'YYYY-MM-DDTHH:mm:ssZ',
+                        events:scheduleTable,
+                        unselectAuto: true,
+                        showNonCurrentDates: false
+                });
+            });
+        </script>
+    </environment>
+}

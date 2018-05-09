@@ -27,38 +27,43 @@
 <ul id="sidebarnav">
 <li class="nav-small-cap">PERSONAL</li>
 <li>
-    <a asp-controller="Home" asp-action="Index">
-        <i class="material-icons">&#xE871;</i><span class="hide-menu">Dashboard</span>
-    </a>
-</li>
-<li>
     <a class="has-arrow waves-effect waves-dark" href="#" aria-expanded="false">
-        <i class="material-icons">&#xE851;</i><span class="hide-menu">帳號資訊</span>
+        <i class="material-icons">&#xE85D;</i><span class="hide-menu">訂課系統</span>
     </a>
     <ul aria-expanded="false" class="collapse">
         <li>
-            <a href="#Avatar">顯示頭像</a>
+            <a asp-controller="Schedule" asp-action="Index">立即訂課</a>
         </li>
         <li>
-            <a href="#">重設密碼</a>
+            <a asp-controller="Schedule" asp-action="Schedule">我的課表</a>
         </li>
         <li>
-            <a href="#">帳單地址</a>
-        </li>
-        <li>
-            <a href="#">銀行帳戶</a>
-        </li>
-        <li>
-            <a href="#">實名認證</a>
+            <a asp-controller="Schedule" asp-action="ResetModel">重新設定</a>
         </li>
     </ul>
 </li>
 <li>
+    <a class="has-arrow waves-effect waves-dark" href="#" aria-expanded="false">
+        <i class="material-icons">&#xE851;</i><span class="hide-menu">客服系統</span>
+    </a>
+    <ul aria-expanded="false" class="collapse">
+        <li>
+            <a asp-controller="Customer" asp-action="Index">顧客頁面</a>
+        </li>
+        <li>
+            <a asp-controller="Customer" asp-action="CustomerList">處理列表</a>
+        </li>
+        <li>
+            <a asp-controller="Customer" asp-action="ItList">其他部門</a>
+        </li>
+    </ul>
+</li>
+<!-- <li>
     <a href="#">
         <i class="material-icons">&#xE7F2;</i><span class="hide-menu">推廣</span>
     </a>
-</li>
-<li class="nav-devider"></li>
+</li> -->
+<!-- <li class="nav-devider"></li>
 <li class="nav-small-cap">TEACHER</li>
 <li>
     <a class="has-arrow waves-effect waves-dark" href="#" aria-expanded="false">
@@ -96,7 +101,7 @@
             <a href="#">證書清單</a>
         </li>
     </ul>
-</li>
+</li> -->
 <!--
 <li> <a class="has-arrow waves-effect waves-dark" href="#" aria-expanded="false"><i class="material-icons">&#xE30A;</i><span class="hide-menu">Template Demos</span></a>
     <ul aria-expanded="false" class="collapse">

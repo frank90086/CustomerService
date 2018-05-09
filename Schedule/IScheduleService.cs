@@ -9,6 +9,9 @@ namespace Omi.Education.Web.Management.Services
     {
         List<AllowTimeTable> GetAllowTime();
         List<AllowTimeTable> GetNotAllowed();
-        void MakePair(List<DateTime> selections, out bool isPair);
+        void CreateBooking(List<DateTimeOffset> selections, out bool isPair);
+        void CreateSchedule(MemberBooking model);
+        void MakePair(MemberBooking model, out bool isSuccess);
+        void ResetModel();
     }
 }

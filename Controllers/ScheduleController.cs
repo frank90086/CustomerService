@@ -4,10 +4,11 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Omi.Education.Web.Management.Services;
+using Omi.Education.Enums;
 using Omi.Education.Enums.Service;
-using Omi.Education.Web.Management.Services.Models;
 using Omi.Education.Web.Management.Models.ScheduleModels;
+using Omi.Education.Web.Management.Services;
+using Omi.Education.Web.Management.Services.Models;
 
 namespace Omi.Education.Web.Management.Controllers
 {
@@ -27,13 +28,39 @@ namespace Omi.Education.Web.Management.Controllers
 
         public IActionResult Selection(string Selections)
         {
-            List<DateTime> selections = PublicMethod.JsonDeSerialize<List<DateTime>>(Selections);
-            bool _isPair;
-            _service.MakePair(selections, out _isPair);
-            if (!_isPair)
-               return RedirectToAction("Index");
-            else
-               return View();
+            List<DateTimeOffset> selections = PublicMethod.JsonDeSerialize<List<DateTimeOffset>>(Selections);
+            bool isFinish;
+            _service.CreateBooking(selections, out isFinish);
+            if (!isFinish)
+                return RedirectToAction("Index");
+            foreach (MemberBooking item in _service.Model.Bookings.ToList())
+            {
+                MemberBalance balance = _service.Model.Balances.Where(x => x.MemberId == item.MemberId && x.AvailableBalances > 0).FirstOrDefault();
+                bool isSuccess;
+
+                if (balance != null && item.Status == BookingStatus.Booking)
+                {
+                    _service.MakePair(item, out isSuccess);
+                    if (isSuccess)
+                    {
+                        _service.CreateSchedule(item);
+                    }
+                    else
+                        _service.Model.Bookings.Remove(item);
+                }
+            }
+            return RedirectToAction("Schedule", "Schedule");
+        }
+
+        public IActionResult Schedule()
+        {
+            ViewBag.Schedule = PublicMethod.JsonSerialize<Schedule>(_service.Model.Schedule);
+            return View();
+        }
+
+        public IActionResult ResetModel(){
+            _service.ResetModel();
+            return RedirectToAction("Index", "Schedule");
         }
     }
 }

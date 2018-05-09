@@ -21,58 +21,116 @@ namespace Omi.Education.Web.Management.Services
 
         public List<AllowTimeTable> GetAllowTime()
         {
-            List<MemberWorkTimeItem> list = new List<MemberWorkTimeItem>();
-            var worklist = Model.Teachers.Select(x => x.Times.ToList());
-            foreach (var item in worklist)
-                list.AddRange(item);
-
-            var returnList = list.Distinct(new PropertyCompare<MemberWorkTimeItem>("Weekday", "Time"))
-                .Select(x => new AllowTimeTable { WeekDay = x.Weekday, Time = x.Time }).OrderBy(x => x.WeekDay).ThenBy(x => x.Time).ToList();
+            var returnList = Model.AvailableDateStock.Where(x => x.Quantity > 0).Select(x => new AllowTimeTable { Time = x.AvailableDate, Quantity = x.Quantity }).OrderBy(x => x.Time).ToList();
             return returnList;
         }
 
         public List<AllowTimeTable> GetNotAllowed()
         {
             List<AllowTimeTable> returnList = new List<AllowTimeTable>();
-            var allowList = GetAllowTime();
-            for (int i = 1; i <= 7; i++)
-            {
-                for (int j = 1; j <= 24; j++)
-                {
-                    var isExist = allowList.Where(x => x.WeekDay == (DayOfWeek) i && x.Time == TimeSpan.FromHours(j)).FirstOrDefault();
-                    if (isExist != null)
-                        continue;
-
-                    returnList.Add(new AllowTimeTable() { WeekDay = (DayOfWeek) i, Time = TimeSpan.FromHours(j) });
-                }
-            }
             return returnList;
         }
 
-        public void MakePair(List<DateTime> selections, out bool isPair)
+        public void CreateBooking(List<DateTimeOffset> selections, out bool isFinish)
         {
             MemberBalance balance = Model.Balances.FirstOrDefault();
             List<MemberBooking> bookingList = new List<MemberBooking>();
             long classes = (long) Model.Bookings.Where(x => x.MemberId == balance.MemberId).ToList().Count;
             if (selections.Count > 0 && selections.Count <= balance.AvailableBalances)
             {
-                foreach (DateTime item in selections)
+                foreach (DateTimeOffset item in selections)
                 {
-                    bookingList.Add(new MemberBooking(){
-                        Id = PublicMethod.GetToken(),
-                        MemberId = balance.MemberId,
-                        StartDate = item.ToLocalDateTimeOffset("China Standard Time"),
-                        EndDate = item.AddHours(1).ToLocalDateTimeOffset("China Standard Time"),
-                        Classes = classes == 0 ? 1 : classes++,
-                        Status = BookingStatus.Booking
-                    });
+                    var exist = Model.Bookings.Where(x => x.StartDate == item).FirstOrDefault();
+                    if (exist == null)
+                    {
+                        bookingList.Add(new MemberBooking()
+                        {
+                            Id = PublicMethod.GetToken(),
+                                MemberId = balance.MemberId,
+                                StartDate = item,
+                                EndDate = item.AddHours(1),
+                               Classes = classes == 0 ? 1 : classes++,
+                                Status = BookingStatus.Booking
+                        });
+                    }
                 }
                 Model.Bookings.AddRange(bookingList);
                 balance.AvailableBalances -= bookingList.Count;
-                isPair = true;
+                isFinish = true;
             }
             else
-                isPair = false;
+                isFinish = false;
+        }
+
+        public void CreateSchedule(MemberBooking model)
+        {
+            Model.Schedule.Events.Add(new ScheduleEvent()
+            {
+                Id = PublicMethod.GetToken(),
+                    ScheduleId = Model.Schedule.Id,
+                    Name = "Chinese Class",
+                    Type = ScheduleEventType.Learning,
+                    StartDate = model.StartDate,
+                    EndDate = model.EndDate,
+                    Status = ScheduleEventStatus.Accept
+            });
+        }
+
+        public void MakePair(MemberBooking model, out bool isSuccess)
+        {
+            TimeSpan machTime = model.StartDate.TimeOfDay;
+            MemberBookingAssigner assigner = model.Assigners.LastOrDefault();
+            if (_CheckAssignStatus(assigner))
+            {
+                isSuccess = true;
+                return;
+            }
+            foreach (MemberWorkTime teacher in Model.Teachers)
+            {
+                MemberWorkTimeItem item = teacher.Times.Where(x => x.Time == machTime).FirstOrDefault();
+                if (item != null)
+                {
+                    model.Assigners.Add(new MemberBookingAssigner()
+                    {
+                        Id = PublicMethod.GetToken(),
+                            MemberId = item.MemberId,
+                            MemberBookingId = model.Id,
+                            Role = AssignerRole.Teacher,
+                            Status = AssignStatus.Assigned
+                    });
+                    model.Status = BookingStatus.Confirm;
+                    _updateStock(item);
+                    break;
+                }
+            }
+            assigner = model.Assigners.LastOrDefault();
+            if (_CheckAssignStatus(assigner))
+                isSuccess = true;
+            else
+                isSuccess = false;
+        }
+
+        private bool _CheckAssignStatus(MemberBookingAssigner assign)
+        {
+            if (assign == null)
+                return false;
+            if (assign.Status == AssignStatus.Assigned)
+                return true;
+            else
+                return false;
+        }
+
+        private void _updateStock(MemberWorkTimeItem item){
+            AvailableDateStock stock = Model.AvailableDateStock.Where(x => x.AvailableDate.DayOfWeek == item.Weekday && x.AvailableDate.Hour == item.Time.Hours).FirstOrDefault();
+            if (stock != null)
+            {
+                AvailableDateStockMember member = stock.Members.Where(x => x.MemberId == item.MemberId).FirstOrDefault();
+                stock.Members.Remove(member);
+            }
+        }
+
+        public void ResetModel(){
+            Model = new InitialModel();
         }
     }
 }
