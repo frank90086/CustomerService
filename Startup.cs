@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Omi.Education.Web.Management.Services;
@@ -28,6 +29,7 @@ namespace Omi.Education.Web.Management
             services.AddAntiforgery(opts => opts.Cookie.Name = "form-token");
 
             services.AddMvc();
+            services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddSingleton<ISupportService, SupportService>(x => { return new SupportService(baseUri); });
             services.AddSingleton<IScheduleService, ScheduleService>();
         }
