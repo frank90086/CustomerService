@@ -12,14 +12,17 @@ namespace Omi.Education.Web.Management.Services
         public List<MemberWorkTime> Teachers { get; set; }
         public List<MemberBalance> Balances { get; set; }
         public List<MemberBooking> Bookings { get; set; }
-        public Schedule Schedule { get; set; }
+        public List<Schedule> Schedules { get; set; }
         public List<AvailableDateStock> AvailableDateStock { get; set; }
+        public string StudentId { get; set; }
         public InitialModel()
         {
             Teachers = new List<MemberWorkTime>();
             Balances = new List<MemberBalance>();
             Bookings = new List<MemberBooking>();
+            Schedules = new List<Schedule>();
             AvailableDateStock = new List<AvailableDateStock>();
+            StudentId = PublicMethod.GetToken();
             Initial();
         }
 
@@ -67,6 +70,17 @@ namespace Omi.Education.Web.Management.Services
                     }
                 }
             }
+
+            Schedules.Add(new Schedule()
+            {
+                Id = PublicMethod.GetToken(),
+                MemberId = memberId,
+                Name = "Chinese Class",
+                Type = ScheduleType.Class,
+                Color = "#F4A460",
+                Visibled = true,
+                IsSystem = false
+            });
             return Teacher;
         }
 
@@ -105,27 +119,26 @@ namespace Omi.Education.Web.Management.Services
 
         private MemberBalance BalanceGenerator()
         {
-            string memberId = PublicMethod.GetToken();
             MemberBalance mb = new MemberBalance()
             {
                 Id = PublicMethod.GetToken(),
-                MemberId = memberId,
+                MemberId = StudentId,
                 Type = BalanceType.Point,
                 TotalBalances = (decimal) 60.00,
                 AvailableBalances = (decimal) 60.00,
                 ExpiredDate = DateTime.Now.AddDays(150)
             };
 
-            Schedule = new Schedule()
+            Schedules.Add(new Schedule()
             {
                 Id = PublicMethod.GetToken(),
-                MemberId = memberId,
+                MemberId = StudentId,
                 Name = "Chinese Class",
                 Type = ScheduleType.Class,
                 Color = "#F4A460",
                 Visibled = true,
                 IsSystem = false
-            };
+            });
             return mb;
         }
     }

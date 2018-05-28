@@ -1,68 +1,59 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
+using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Omi.Education.Enums;
 using Omi.Education.Enums.Service;
 using Omi.Education.Web.Management.Models.ScheduleModels;
 using Omi.Education.Web.Management.Services;
 using Omi.Education.Web.Management.Services.Models;
-using System.Text.RegularExpressions;
-using System.Globalization;
-using System.Threading;
 using TimeZoneConverter;
 
 namespace Omi.Education.Web.Management.Controllers
 {
     public class ScheduleController : Controller
     {
-        private ScheduleService _service;
+        private IScheduleService _service;
         private IHttpContextAccessor _accessor;
         private CultureInfo _culture;
         private TimeZoneInfo _customerTimezone;
         private TimeZoneInfo _systemTimezone;
         public ScheduleController(IScheduleService service, IHttpContextAccessor accessor)
         {
-            _service = service as ScheduleService;
+            _service = service;
             _accessor = accessor;
 
             var zoneId = _accessor.HttpContext.Request.Cookies["tzTime"] ?? "Asia/Taipei";
-            string tz = TZConvert.IanaToWindows(zoneId);
-            _customerTimezone = TimeZoneInfo.FindSystemTimeZoneById(tz);
+            _customerTimezone = TimeZoneInfo.FindSystemTimeZoneById(TZConvert.IanaToWindows(zoneId));
             _systemTimezone = TimeZoneInfo.Local;
+
             var cultureId = _accessor.HttpContext.Request.Cookies["culture"] ?? "zh-TW";
-            var cultureInfo = CultureInfo.CreateSpecificCulture(cultureId);
-            _culture = cultureInfo;
+            _culture = CultureInfo.CreateSpecificCulture(cultureId);
         }
         public IActionResult Index()
         {
-            List<AllowTimeTable> list = _service.GetAllowTime();
-            foreach (var item in list)
-            {
-                item.Time = TimeZoneInfo.ConvertTime(item.Time, _customerTimezone);
-            }
-            ViewBag.AllowTimeTable = PublicMethod.JsonSerialize<List<AllowTimeTable>>(list);
+            List<AllowTimeTableViewModel> list = _service.GetAllowTime(_customerTimezone);
+            ViewBag.AllowTimeTable = PublicMethod.JsonSerialize<List<AllowTimeTableViewModel>>(list);
             ViewBag.Point = _service.Model.Balances.FirstOrDefault().AvailableBalances;
             return View();
         }
 
         public IActionResult Selection(string Selections)
         {
-            List<DateTimeOffset> selections = PublicMethod.JsonDeSerialize<List<DateTimeOffset>>(Selections);
-            List<DateTimeOffset> convertSelections = new List<DateTimeOffset>();
-            foreach (var item in selections)
-            {
-                convertSelections.Add(TimeZoneInfo.ConvertTime(item, _systemTimezone));
-            }
+            List<SelectionsViewModel> selections = PublicMethod.JsonDeSerialize<List<SelectionsViewModel>>(Selections);
             bool isFinish;
             _service.CreateBooking(selections, out isFinish);
             if (!isFinish)
                 return RedirectToAction("Index");
             foreach (MemberBooking item in _service.Model.Bookings.ToList())
             {
-                MemberBalance balance = _service.Model.Balances.Where(x => x.MemberId == item.MemberId && x.AvailableBalances > 0).FirstOrDefault();
+                MemberBalance balance = _service.Model.Balances.FirstOrDefault(x => x.MemberId == item.MemberId && x.AvailableBalances > 0);
                 bool isSuccess;
 
                 if (balance != null && item.Status == BookingStatus.Booking)
@@ -81,12 +72,13 @@ namespace Omi.Education.Web.Management.Controllers
 
         public IActionResult Schedule()
         {
-            foreach (var item in _service.Model.Schedule.Events)
-            {
-                item.StartDate = TimeZoneInfo.ConvertTime(item.StartDate, _customerTimezone);
-                item.EndDate = TimeZoneInfo.ConvertTime(item.EndDate, _customerTimezone);
-            }
-            ViewBag.Schedule = PublicMethod.JsonSerialize<Schedule>(_service.Model.Schedule);
+            ViewBag.Schedule = PublicMethod.JsonSerialize<List<ScheduleViewModel>>(_service.GetSchedule(_customerTimezone));
+            return View();
+        }
+
+        public IActionResult Exception()
+        {
+            ViewBag.Teachers = _service.GetTeacherList();
             return View();
         }
 
@@ -96,12 +88,45 @@ namespace Omi.Education.Web.Management.Controllers
             return RedirectToAction("Index", "Schedule");
         }
 
-
         public JsonResult SetTimeZoneCultureCookie(string time, string culture)
         {
             _accessor.HttpContext.Response.Cookies.Append("tzTime", time);
             _accessor.HttpContext.Response.Cookies.Append("culture", culture);
-            return Json(new { StandardName = TimeZoneInfo.Local.StandardName, id = TimeZoneInfo.Local.Id, displayname = TimeZoneInfo.Local.DisplayName});
+            return Json(new { });
+        }
+
+        [HttpPost]
+        public JsonResult GetTeacherWorkTime(string id)
+        {
+            var workTime = _service.Model.Teachers.Where(x => x.MemberId == id).FirstOrDefault();
+            return Json(workTime);
+        }
+
+        [HttpPost]
+        public JsonResult CheckException(string Id, DateTimeOffset selection)
+        {
+            SelectionsViewModel selectTime = new SelectionsViewModel() { SelectTime = selection };
+            bool hasClass = false;
+            _service.CheckException(Id, selectTime, out hasClass);
+            return Json(new { info = hasClass });
+        }
+
+        [HttpPost]
+        public JsonResult ConfirmException(string Id, DateTimeOffset selection)
+        {
+            SelectionsViewModel selectTime = new SelectionsViewModel() { SelectTime = selection };
+            bool isFinish = false;
+            _service.CreateException(Id, selectTime, out isFinish);
+            return Json(new { info = isFinish });
+        }
+
+        [HttpPost]
+        public JsonResult CancelException(string id, DateTimeOffset selection)
+        {
+            SelectionsViewModel selectTime = new SelectionsViewModel() { SelectTime = selection };
+            bool isFinish;
+            _service.CancelException(id, selectTime, out isFinish);
+            return Json(new { info = isFinish });
         }
     }
 }

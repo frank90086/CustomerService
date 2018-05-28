@@ -17,14 +17,14 @@
 </div>
 
 @section Styles {
-    <environment names="Staging,Production">
+    <environment names="Development">
         <link rel="stylesheet" href="~/lib/fullcalendar/dist/fullcalendar.css"/>
         <link href="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/6.6.5/sweetalert2.css" rel="stylesheet" />
     </environment>
 }
 
 @section Scripts {
-    <environment names="Staging,Production">
+    <environment names="Development">
         <script type="text/javascript" src="~/lib/fullcalendar/dist/fullcalendar.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/6.6.5/sweetalert2.js"></script>
         <script>
@@ -35,7 +35,7 @@
                 var selection = [];
                 selectList = $("#calendar").fullCalendar('clientEvents', function (event) { return (event.rendering !== "background"); });
                 $(selectList).each(function(index, value){
-                    selection.push(value.start);
+                    selection.push({ SelectTime:value.start} );
                 });
                 if (selection.length == 0) {
                     swal({
@@ -67,11 +67,10 @@
                         if (value.Quantity > 0)
                         {
                             var item = {
-
                             start: moment(value.Time).format('YYYY-MM-DDTHH:mm:ssZ'),
                             end:moment(value.Time).add(1, 'hours').format('YYYY-MM-DDTHH:mm:ssZ'),
                             rendering: 'background',
-                            backgroundColor: '	#00FA9A'
+                            backgroundColor: '#00FA9A'
                         };
                         convertTimeTable.push(item);
                     }

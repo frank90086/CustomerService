@@ -11,33 +11,35 @@
 <div class="card-body">
     <form asp-controller="Schedule" asp-action="Selection" method="post" id="sendselectionsform">
         <input id="selectionscontent" style="display:none" name="Selections"/>
-        <button type="button" onclick="sendselections()">Send Selections</button>
     </form>
 </div>
 
 @section Styles {
-    <environment names="Staging,Production">
+    <environment names="Development">
         <link rel="stylesheet" href="~/lib/fullcalendar/dist/fullcalendar.css"/>
         <link href="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/6.6.5/sweetalert2.css" rel="stylesheet" />
     </environment>
 }
 
 @section Scripts {
-    <environment names="Staging,Production">
+    <environment names="Development">
         <script type="text/javascript" src="~/lib/fullcalendar/dist/fullcalendar.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/6.6.5/sweetalert2.js"></script>
         <script>
             $(document).ready(function() {
                 var schedule = @(schedule);
                 var scheduleTable = [];
-                $('#cubeColor').append('■').css({'color': schedule.Color, 'font-size': '28px'});
-                $(schedule.Events).each(function(index, value){
+                if (typeof schedule.length > 0)
+                {
+                    $('#cubeColor').append('■').css({'color': schedule[0].Color, 'font-size': '28px'});
+                }
+                $(schedule).each(function(index, value){
                     var item = {
-                            title: schedule.Name + ' ' +moment(value.StartDate).format('HH:mm'),
+                            title: value.Name + ' ' +moment(value.StartDate).format('HH:mm'),
                             start: moment(value.StartDate).format('YYYY-MM-DDTHH:mm:ssZ'),
                             end:moment(value.EndDate).format('YYYY-MM-DDTHH:mm:ssZ'),
-                            backgroundColor: schedule.Color,
-                            borderColor: schedule.Color
+                            backgroundColor: value.Color,
+                            borderColor: value.Color
                         };
                         scheduleTable.push(item);
                 });
